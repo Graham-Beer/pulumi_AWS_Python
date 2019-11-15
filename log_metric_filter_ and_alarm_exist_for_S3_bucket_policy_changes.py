@@ -88,7 +88,12 @@ cloudwatch_metrics = cloudwatch.LogMetricFilter(
         'namespace': "S3ActivityEventCount",
         'value': "1"
     },
-    pattern = "{ ($.eventSource = s3.amazonaws.com) && (($.eventName = PutBucketAcl) || ($.eventName = PutBucketPolicy) || ($.eventName = PutBucketCors) || ($.eventName = PutBucketLifecycle) || ($.eventName = PutBucketReplication) || ($.eventName = DeleteBucketPolicy) || ($.eventName = DeleteBucketCors) || ($.eventName = DeleteBucketLifecycle) || ($.eventName = DeleteBucketReplication)) }"
+    pattern = "{( \
+        $.eventSource = s3.amazonaws.com) && (($.eventName = PutBucketAcl) \
+        || ($.eventName = PutBucketPolicy) || ($.eventName = PutBucketCors) \
+        || ($.eventName = PutBucketLifecycle) || ($.eventName = PutBucketReplication) \
+        || ($.eventName = DeleteBucketPolicy) || ($.eventName = DeleteBucketCors) \
+        || ($.eventName = DeleteBucketLifecycle) || ($.eventName = DeleteBucketReplication)) }"
 )
 
 # Create role for cloudtrail service
