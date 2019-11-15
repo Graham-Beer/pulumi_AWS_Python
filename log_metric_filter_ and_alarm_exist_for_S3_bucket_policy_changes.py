@@ -9,7 +9,7 @@ from pulumi_aws import(
 
 # region and account ID
 region = 'eu-west-2'
-account_id = '818155059458'
+account_id = ''
 
 # Create s3 bucket for CloudTrail logging
 bucket = s3.Bucket(
