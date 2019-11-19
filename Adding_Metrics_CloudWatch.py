@@ -70,6 +70,7 @@ metrics['NomfaConsoleLoginsChangesMetricFilter']['pattern'] = '{( \
     ($.eventName = "ConsoleLogin") && ($.additionalEventData.MFAUsed !="Yes") && ($.responseElements.ConsoleLogin != "Failure") && \
     ($.additionalEventData.SamlProviderArn NOT EXISTS) )}'
 
+# Apply metrics
 for metricName in metrics:
     cloudwatch.LogMetricFilter(
         metricName,
