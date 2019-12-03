@@ -1,40 +1,35 @@
 import pulumi
+from pulumi import Output, ResourceOptions, export
 from pulumi_aws import s3, ec2
 
 # create bucket for VPC logs
-bucket = s3.Bucket('vpc-flow-logs')
-
-# Find VPC information
-vpc = ec2.get_vpc()
-
-vpcConfig = ec2.FlowLog(
-    'flowlogs',
-    log_destination = bucket.arn,
-    log_destination_type = 's3',
-    traffic_type = 'ALL',
-    vpc_id = vpc.id
+bucket_vpc_and_subnets = s3.Bucket(
+    'vpc-and-subnet-flow-logs',
+    force_destroy = True
 )
 
-# create bucket for subnet logs
-bucket2 = s3.Bucket('subnet-flow-logs')
+# s3 Block Public access
+s3.BucketPublicAccessBlock(
+    f"Block_Public_access",
+    block_public_acls = True,
+    block_public_policy = True,
+    ignore_public_acls = True,
+    restrict_public_buckets = True,
+    bucket = bucket_vpc_and_subnets.id
+)
 
-# list of subnets
-if len(str(vpc.id).split()) > 1:
-    subnet_ids = []
-    for net in vpc.id:
-        subnet_ids.append(ec2.get_subnet_ids(vpc_id = net).ids)
-else:
-   subnet_ids = ec2.get_subnet_ids(vpc_id = vpc.id).ids
+# Find VPC information
+vpcs = ec2.get_vpcs().ids
 
-# Config log for each subnet
-for id in subnet_ids:
-    subnet_logs = ec2.FlowLog(
-        f'subnetlogs_{id}',
-        log_destination = bucket2.arn,
+for vpc in vpcs:
+    ec2.FlowLog(
+        f"flowlogs_{vpc}",
+        opts = ResourceOptions(
+            depends_on = [
+                bucket_vpc_and_subnets
+        ]),
+        log_destination = bucket_vpc_and_subnets.arn,
         log_destination_type = 's3',
         traffic_type = 'ALL',
-        subnet_id = id
+        vpc_id = vpc
     )
-
-# pulumi up --yes
-# pulumi stack export > logging.json
